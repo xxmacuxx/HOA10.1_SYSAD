@@ -1,0 +1,90 @@
+
+- name: Install ELK Prereq Ubuntu
+  apt:
+    name:
+      - openjdk-11-jdk
+      - apt-transport-https
+      - curl
+      - gpgv
+      - gpgsm
+      - gnupg-l10n
+      - gnupg
+      - dirmngr
+    state: latest
+
+- name: Get PGP Key Ubuntu
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Install Elasticsearch repository into sources list Ubuntu
+  apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+    state: present
+
+- name: Install Elasticsearch Ubuntu
+  apt:
+    name: elasticsearch
+    state: latest
+    update_cache: yes
+
+- name: Configure Elasticsearch Add network.host Ubuntu
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    line: "network.host: 0.0.0.0"
+    state: present
+
+- name: Configure Elasticsearch Add http.port Ubuntu
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    line: "http.port: 9200"
+    state: present
+
+- name: Configure Elasticsearch Add discovery.type Ubuntu
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    line: "discovery.type: single-node"
+    state: present
+
+
+- name: Enable service Elasticsearch and ensure it is not masked Ubuntu
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    masked: no
+
+
+- name: Install Logstash (Ubuntu)
+  apt:
+    name: logstash
+    state: latest
+    update_cache: yes
+
+- name: Enable service logstash Ubuntu
+  systemd:
+    name: logstash
+    enabled: yes
+
+- name: Install Kibana Ubuntu
+  apt:
+    name: kibana
+    state: latest
+    update_cache: yes
+
+- name: Configure Kibana Add server.port Ubuntu
+  lineinfile:
+    dest: /etc/kibana/kibana.yml
+    line: "server.port: 5601"
+    state: present
+
+
+- name: Configure Kibana Add elasticsearch.hosts Ubuntu
+  lineinfile:
+    dest: /etc/kibana/kibana.yml
+    line: 'elasticsearch.hosts: [“http://0.0.0.0:9200"]'
+    state: present
+
+- name: Enable service Kibana Ubuntu
+  systemd:
+    name: kibana
+    enabled: yes

@@ -1,0 +1,33 @@
+
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  -  name: Update repository index CentOS
+     tags: always
+     package:
+       update_only: yes
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "CentOS"
+
+  -  name: Install updates Ubuntu
+     tags: always
+     apt:
+       upgrade: dist
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "Ubuntu"
+
+
+- hosts: ubuntu_elk
+  become: true
+  roles:
+    - ubuntu_elk
+
+- hosts: centos_elk
+  become: true
+  roles:
+    - centos_elk

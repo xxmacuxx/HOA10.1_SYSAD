@@ -1,0 +1,87 @@
+
+- name: Install ELK Prereq CentOs
+  yum:
+    name:
+      - java-11-openjdk
+      - curl
+      - gnupg
+    state: latest
+
+- name: Install elasticsearch rpm key CentOs
+  rpm_key:
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+  become: true
+
+- name: install elasticsearch 7.x rpm repository
+  yum_repository:
+    name: Elastic_7.X_repo
+    baseurl: https://artifacts.elastic.co/packages/7.x/yum
+    gpgcheck: true
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    description: Elastic 7.X Repo
+  become: true
+
+- name: Install Elasticsearch CentOs
+  yum:
+    name: elasticsearch
+    state: latest
+    update_cache: yes
+
+- name: Configure Elasticsearch Add network.host CentOs
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    line: "network.host: 0.0.0.0"
+    state: present
+
+- name: Configure Elasticsearch Add http.port CentOs
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    line: "http.port: 9200"
+    state: present
+
+- name: Enable service Elasticsearch and ensure it is not masked CentOs
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    masked: no
+
+- name: Install Logstash CentOs
+  yum:
+    name: logstash
+    state: latest
+    update_cache: yes
+
+- name: Enable service logstash for CentOs
+  systemd:
+    name: logstash
+    enabled: yes
+
+- name: Install Kibana for CentOs
+  yum:
+    name: kibana
+    state: latest
+    update_cache: yes
+
+- name: Configure Kibana Add server.port for CentOs
+  lineinfile:
+    dest: /etc/kibana/kibana.yml
+    line: "server.port: 5601"
+    state: present
+
+- name: Configure Kibana Add server.host for CentOs
+  lineinfile:
+    dest: /etc/kibana/kibana.yml
+    line: 'server.host: “0.0.0.0”'
+    state: present
+
+- name: Configure Kibana Add elasticsearch.hosts for CentOs
+  lineinfile:
+    dest: /etc/kibana/kibana.yml
+    line: 'elasticsearch.hosts: [“http://0.0.0.0:9200"]'
+    state: present
+
+- name: Enable service Kibana for CentOs
+  systemd:
+    name: kibana
+    enabled: yes
